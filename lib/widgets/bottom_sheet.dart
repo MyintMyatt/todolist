@@ -1,29 +1,75 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
+import 'package:todolists/widgets/datepicker.dart';
+import 'package:todolists/widgets/reminder.dart';
+import 'package:todolists/widgets/time_small_widgets.dart';
 
-bottomSheet(AppThemeData theme, ThemeService themeService) {
+bottomSheet(BuildContext context,AppThemeData theme, ThemeService themeService) {
   Get.bottomSheet(
-    elevation: 10,
-      backgroundColor: AppThemeData.blackBgColor,
+      elevation: 20,
+      backgroundColor: Get.isDarkMode
+          ? AppThemeData.blackBgColor
+          : AppThemeData.whiteBgColor,
       SizedBox(
-    width: double.infinity,
-    height: 300,
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Container(
-            width: 100,
-            height: 5,
-            decoration: BoxDecoration(
-                color: AppThemeData.greenColor,
-              borderRadius: BorderRadius.circular(20)
-            ),
-          )
-        ],
-      ),
-    ),
-  ));
+        width: double.infinity,
+        height: 300,
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 10,
+            children: [
+              Center(
+                child: Container(
+                  width: 100,
+                  height: 5,
+                  decoration: BoxDecoration(
+                      color: AppThemeData.greenColor,
+                      borderRadius: BorderRadius.circular(20)),
+                ),
+              ),
+              Text(
+                'Add Task',
+                style: theme.subTitleStyle,
+              ),
+              TextFormField(
+                maxLines: 3,
+                cursorColor: AppThemeData.greenColor,
+                decoration: InputDecoration(
+                    hintText: 'write down task',
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+                    filled: true,
+                    fillColor: Get.isDarkMode
+                        ? AppThemeData.blackColor
+                        : AppThemeData.whiteColor,
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(10))),
+              ),
+              Column(
+                spacing: 10,
+                children: [
+                  Row(
+                    spacing: 10,
+                    children: [
+                      timeSmallWidget(fun: (){datePicker(context: context);}, icon: Icons.calendar_month_rounded, textWidget: Text('20',style: theme.smallTextStyle,)),
+                      timeSmallWidget(fun: (){}, icon: Icons.timer, width: 98, textWidget: Text('Start Time',style: theme.smallTextStyle,)),
+                    ],
+                  ),Row(
+                    spacing: 10,
+                    children: [
+                      timeSmallWidget(fun: (){}, icon: Icons.timer, width: 98, textWidget: Text('End Time',style: theme.smallTextStyle,)),
+                      timeSmallWidget(fun: (){pickReminderTime(context);}, icon: Icons.repeat, textWidget: Text('20',style: theme.smallTextStyle,)),
+                    ],
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ));
 }

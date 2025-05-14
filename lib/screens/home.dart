@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: AppThemeData.greenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         onPressed: () {
-          bottomSheet(theme, themeService);
+          bottomSheet(context, theme, themeService);
         },
         child: Icon(
           CupertinoIcons.add,
