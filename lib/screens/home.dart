@@ -8,11 +8,19 @@ import 'package:todolists/widgets/bottom_nav_bar.dart';
 import 'package:todolists/widgets/bottom_sheet.dart';
 import 'package:todolists/widgets/home_heading_bar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   AppThemeData theme = AppThemeData();
+
   ThemeService themeService = ThemeService();
+
+  DateTime? _selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +32,7 @@ class HomeScreen extends StatelessWidget {
           child: Padding(
         padding: EdgeInsets.only(left: 15, right: 15, top: 70),
         child: Column(
-          children: [
-            homeHeadingBar()
-          ],
+          children: [homeHeadingBar()],
         ),
       )),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
@@ -34,7 +40,17 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: AppThemeData.greenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         onPressed: () {
-          bottomSheet(context, theme, themeService);
+          bottomSheet(
+              context: context,
+              theme: theme,
+              themeService: themeService,
+              selectedDate: (DateTime date) {
+                setState(() {
+                  _selectedDate = date;
+                });
+              },
+              selectedStartTime: (String startTime) {},
+              selectedEndTime: (String endTime) {});
         },
         child: Icon(
           CupertinoIcons.add,

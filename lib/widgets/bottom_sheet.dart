@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -5,9 +7,16 @@ import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
 import 'package:todolists/widgets/datepicker.dart';
 import 'package:todolists/widgets/reminder.dart';
+import 'package:todolists/widgets/timePicker.dart';
 import 'package:todolists/widgets/time_small_widgets.dart';
 
-bottomSheet(BuildContext context,AppThemeData theme, ThemeService themeService) {
+bottomSheet(
+    {required BuildContext context,
+    required AppThemeData theme,
+    required ThemeService themeService,
+    required Function(DateTime) selectedDate,
+    required Function(String) selectedStartTime,
+    required Function(String) selectedEndTime}) {
   Get.bottomSheet(
       elevation: 20,
       backgroundColor: Get.isDarkMode
@@ -56,14 +65,59 @@ bottomSheet(BuildContext context,AppThemeData theme, ThemeService themeService) 
                   Row(
                     spacing: 10,
                     children: [
-                      timeSmallWidget(fun: (){datePicker(context: context);}, icon: Icons.calendar_month_rounded, textWidget: Text('20',style: theme.smallTextStyle,)),
-                      timeSmallWidget(fun: (){}, icon: Icons.timer, width: 98, textWidget: Text('Start Time',style: theme.smallTextStyle,)),
+                      timeSmallWidget(
+                          fun: () async {
+                            DateTime? pickedDate =
+                                await datePicker(context: context);
+                            if (pickedDate != null) {
+                              selectedDate(pickedDate);
+                            }
+                          },
+                          icon: Icons.calendar_month_rounded,
+                          textWidget: Text(
+                            '20',
+                            style: theme.smallTextStyle,
+                          )),
+                      timeSmallWidget(
+                          fun: () async {
+                            TimeOfDay? startTime = await timePicker(context);
+                            if(startTime != null){
+                              selectedStartTime(startTime!.format(context));
+                            }
+                          },
+                          icon: Icons.timer,
+                          width: 98,
+                          textWidget: Text(
+                            'Start Time',
+                            style: theme.smallTextStyle,
+                          )),
                     ],
-                  ),Row(
+                  ),
+                  Row(
                     spacing: 10,
                     children: [
-                      timeSmallWidget(fun: (){}, icon: Icons.timer, width: 98, textWidget: Text('End Time',style: theme.smallTextStyle,)),
-                      timeSmallWidget(fun: (){pickReminderTime(context);}, icon: Icons.repeat, textWidget: Text('20',style: theme.smallTextStyle,)),
+                      timeSmallWidget(
+                          fun: () async{
+                            TimeOfDay? endTime = await timePicker(context);
+                            if(endTime != null){
+                              selectedEndTime(endTime!.format(context));
+                            }
+                          },
+                          icon: Icons.timer,
+                          width: 98,
+                          textWidget: Text(
+                            'End Time',
+                            style: theme.smallTextStyle,
+                          )),
+                      timeSmallWidget(
+                          fun: () {
+                            pickReminderTime(context);
+                          },
+                          icon: Icons.repeat,
+                          textWidget: Text(
+                            '20',
+                            style: theme.smallTextStyle,
+                          )),
                     ],
                   ),
                 ],
