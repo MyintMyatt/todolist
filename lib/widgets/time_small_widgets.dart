@@ -6,12 +6,13 @@ Widget timeSmallWidget(
     {required Function() fun,
     required IconData icon,
     double? width,
-    Text? textWidget}) {
+    Widget? textWidget}) {
   return GestureDetector(
     onTap: fun,
     child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        width: width ?? 70,
+        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+        margin: EdgeInsets.symmetric(horizontal: 3),
+        width: width ?? 55,
         height: 36,
         alignment: Alignment.centerRight,
         decoration: BoxDecoration(

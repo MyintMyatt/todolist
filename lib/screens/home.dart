@@ -40,17 +40,17 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppThemeData.greenColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         onPressed: () {
-          bottomSheet(
-              context: context,
-              theme: theme,
-              themeService: themeService,
-              selectedDate: (DateTime date) {
-                setState(() {
-                  _selectedDate = date;
-                });
-              },
-              selectedStartTime: (String startTime) {},
-              selectedEndTime: (String endTime) {});
+          Get.bottomSheet(
+            elevation: 20,
+            backgroundColor: Get.isDarkMode
+                ? AppThemeData.blackBgColor
+                : AppThemeData.whiteBgColor,
+              AddTaskBottomSheet(
+                  theme: theme,
+                  themeService: themeService,
+                  )
+          );
+
         },
         child: Icon(
           CupertinoIcons.add,
