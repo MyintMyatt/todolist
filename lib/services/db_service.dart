@@ -7,7 +7,7 @@ import 'package:todolists/models/task.dart';
 class DBService {
   static Database? _db;
   static String _dbName = 'to_do_list.db';
-  static String _tblName = 'tblTasks';
+  static String _tblTasks = 'tblTasks';
   static String _tblCategory = 'tblCategory';
 
   Future<Database> get _database async {
@@ -17,14 +17,15 @@ class DBService {
   }
 
   Future<Database> initDB() async {
-    String dbPath = await getDatabasesPath();
+      String dbPath = await getDatabasesPath();
     String path = join(dbPath, _dbName);
     print('Successfully created table');
     return await openDatabase(path, version: 1, onCreate: (db, version) async {
       await db.execute('''
-            CREATE TABLE $_tblName(
+            CREATE TABLE $_tblTasks(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             desc TEXT NOT NULL,
+            date TEXT NOT NULL,
             start_time TEXT NOT NULL,
             end_time TEXT NOT NULL,
             category TEXT,
@@ -64,8 +65,8 @@ class DBService {
 
   Future<int> addTask(Task task) async {
     final db = await _database;
-    print('Inserting task in db......');
-    return db.insert(_tblName, task.toMap(),
+
+    return db.insert(_tblTasks, task.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }

@@ -20,7 +20,7 @@ class Task{
     return {
       'id': id,
       'desc': desc,
-      'date': date,
+      'date': date.toIso8601String(),
       'start_time': startTime,
       'end_time': endTime,
       'category': category,
@@ -30,7 +30,7 @@ class Task{
       'repeatTimeUnit': repeatTimeUnit,
       'priority': priority,
       'status': status,
-      'created_at': createdAt,
+      'created_at': createdAt.toIso8601String(),
     };
   }
 

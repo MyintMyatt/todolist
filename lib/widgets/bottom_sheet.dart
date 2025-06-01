@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
@@ -35,7 +33,6 @@ class AddTaskBottomSheet extends StatefulWidget {
 class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   AnimationStyle? _dropDownAnimatingStyle;
   TextEditingController descController = TextEditingController();
-
 
   String _selectedDate = DateFormat('dd').format(DateTime.now()); //date
   String?
