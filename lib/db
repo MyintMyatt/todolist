@@ -1,0 +1,48 @@
++---------------------+
+|      categories     |
++---------------------+
+| id          INTEGER | PK
+| name        TEXT    | NOT NULL
+| color       TEXT    | Optional HEX color
++---------------------+
+
++---------------------+
+|        tags         |
++---------------------+
+| id          INTEGER | PK
+| name        TEXT    | UNIQUE, NOT NULL
++---------------------+
+
++---------------------+
+|        tasks        |
++---------------------+
+| id                 INTEGER | PK
+| title              TEXT    | NOT NULL
+| description        TEXT    | Optional
+| is_done            INTEGER | 0 (false), 1 (true), default 0
+| due_date           TEXT    | ISO 8601 string (nullable)
+| priority           INTEGER | 1=High, 2=Medium, 3=Low (default 2)
+| recurrence_type     TEXT    | 'none', 'daily', 'weekly', 'monthly', 'every_n_days'
+| recurrence_interval INTEGER | Optional, used if type = every_n_days
+| category_id        INTEGER | FK → categories(id), nullable
+| created_at         TEXT    | ISO 8601 timestamp
+| updated_at         TEXT    | ISO 8601 timestamp
++---------------------+
+
++-------------------------+
+|      task_history       |
++-------------------------+
+| id            INTEGER   | PK
+| task_id       INTEGER   | FK → tasks(id)
+| completed_at  TEXT      | ISO 8601 datetime (NOT NULL)
+| due_date      TEXT      | Due date at time of completion (nullable)
+| notes         TEXT      | Optional comment
++-------------------------+
+
++-------------------------+
+|       task_tags         |
++-------------------------+
+| task_id     INTEGER     | FK → tasks(id)
+| tag_id      INTEGER     | FK → tags(id)
+| PRIMARY KEY (task_id, tag_id)
++-------------------------+

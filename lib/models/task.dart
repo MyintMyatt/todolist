@@ -18,7 +18,6 @@ class Task{
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'desc': desc,
       'date': date.toIso8601String(),
       'start_time': startTime,
