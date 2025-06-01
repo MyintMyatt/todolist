@@ -64,6 +64,7 @@ class DBService {
 
   Future<int> addTask(Task task) async {
     final db = await _database;
+    print('Inserting task in db......');
     return db.insert(_tblName, task.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }

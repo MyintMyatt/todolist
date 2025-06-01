@@ -11,6 +11,7 @@ Widget timeSmallWidgetDropdown({
   required AnimationStyle animationSytle,
   double? width,
   Widget? textWidget,
+  bool? isRemainRequiredFields = false
 }) {
   return PopupMenuButton<String>(
     popUpAnimationStyle: animationSytle,
@@ -50,8 +51,8 @@ Widget timeSmallWidgetDropdown({
           Icon(
             icon,
             color: Get.isDarkMode
-                ? AppThemeData.blackBgColor
-                : AppThemeData.whiteBgColor,
+                ? isRemainRequiredFields! ? Colors.red : AppThemeData.blackBgColor
+                : isRemainRequiredFields! ? Colors.red : AppThemeData.whiteBgColor,
           ),
           if (textWidget != null) SizedBox(width: 5),
           textWidget ?? Container(),

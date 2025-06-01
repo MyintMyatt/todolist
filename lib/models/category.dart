@@ -11,4 +11,9 @@ class Category {
   factory Category.fromJson(Map<String, dynamic> map) {
     return Category(id: map['id'], categoryName: map['categoryName']);
   }
+
+  @override
+  String toString() {
+    return 'Category{id: $id, categoryName: $categoryName}';
+  }
 }

@@ -6,7 +6,8 @@ Widget timeSmallWidget(
     {required Function() fun,
     required IconData icon,
     double? width,
-    Widget? textWidget}) {
+    Widget? textWidget,
+    bool? isRemainRequiredFields = false}) {
   return GestureDetector(
     onTap: fun,
     child: Container(
@@ -37,8 +38,8 @@ Widget timeSmallWidget(
             Icon(
               icon,
               color: Get.isDarkMode
-                  ? AppThemeData.blackBgColor
-                  : AppThemeData.whiteBgColor,
+                  ? isRemainRequiredFields! ? Colors.red : AppThemeData.blackBgColor
+                  : isRemainRequiredFields! ? Colors.red : AppThemeData.whiteBgColor,
             ),
             textWidget ?? Container()
           ],

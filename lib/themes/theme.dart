@@ -31,7 +31,7 @@ class AppThemeData{
       return GoogleFonts.cabin(textStyle: TextStyle(color: AppThemeData.greenColor, fontSize: 18, fontWeight: FontWeight.bold));
    }
    TextStyle get normalTitleStyle {
-      return GoogleFonts.pacifico(textStyle: TextStyle( fontSize: 20, fontWeight: FontWeight.bold));
+      return GoogleFonts.poppins(textStyle: TextStyle( fontSize: 15, fontWeight: FontWeight.bold));
    }
    TextStyle get smallTextStyle {
       return GoogleFonts.lato(textStyle: TextStyle( fontSize: 10, fontWeight: FontWeight.normal, color: AppThemeData.blackColor));

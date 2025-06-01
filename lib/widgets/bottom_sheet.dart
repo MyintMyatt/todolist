@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:todolists/models/AppData.dart';
 import 'package:todolists/models/category.dart';
+import 'package:todolists/models/task.dart';
 import 'package:todolists/services/db_service.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
@@ -32,18 +34,21 @@ class AddTaskBottomSheet extends StatefulWidget {
 
 class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   AnimationStyle? _dropDownAnimatingStyle;
+  TextEditingController descController = TextEditingController();
 
-  String _selectedDate = DateFormat('dd').format(DateTime.now());
+
+  String _selectedDate = DateFormat('dd').format(DateTime.now()); //date
   String?
-      _selectedStartTime; // = TimeOfDay(hour: now.hour, minute: now.minute).format(context);
+  _selectedStartTime; // = TimeOfDay(hour: now.hour, minute: now.minute).format(context);
   String? _selectedEndTime;
   String? _selectedCategory;
   String? _selectedPriority;
   String? _selectedRepeat;
   int? _repeatInterval;
-  String? _repeatUnit;// to show ui
+  String? _repeatUnit; // to show ui
   String? _selectedReminder; // to show ui
   int? _selectedReminderMinutes; // to store in db
+  bool isRemainRequiredFields = false; // to change red color for mandatory fields icons
 
   List<String> newCategoryList = [];
   late DBService dbService;
@@ -58,10 +63,9 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
     );
     dbService = DBService();
     loadCategoryFromDB();
-
   }
 
-  loadCategoryFromDB() async{
+  loadCategoryFromDB() async {
     List<String> list = await dbService.getCategories();
     setState(() {
       newCategoryList = list;
@@ -71,6 +75,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   @override
   Widget build(BuildContext context) {
     List<String> categoryList = AppData().categoryDropDown + newCategoryList;
+
     categoryList.add('+ New');
     return SingleChildScrollView(
       child: Padding(
@@ -78,7 +83,10 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
             top: 15,
             left: 15,
             right: 15,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 7),
+            bottom: MediaQuery
+                .of(context)
+                .viewInsets
+                .bottom + 7),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
@@ -97,12 +105,13 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
               style: widget.theme.subTitleStyle,
             ),
             TextFormField(
+              controller: descController,
               maxLines: 3,
               cursorColor: AppThemeData.greenColor,
               decoration: InputDecoration(
                   hintText: 'write down task',
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+                  EdgeInsets.symmetric(horizontal: 13, vertical: 10),
                   filled: true,
                   fillColor: Get.isDarkMode
                       ? AppThemeData.blackColor
@@ -121,12 +130,13 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     padding:
-                        EdgeInsets.only(top: 5, bottom: 20, left: 5, right: 5),
+                    EdgeInsets.only(top: 5, bottom: 20, left: 5, right: 5),
                     children: [
+                      //date picker
                       timeSmallWidget(
                           fun: () async {
                             DateTime? pickedDate =
-                                await datePicker(context: context);
+                            await datePicker(context: context);
                             if (pickedDate != null) {
                               setState(() {
                                 _selectedDate =
@@ -139,24 +149,29 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             _selectedDate,
                             style: widget.theme.smallTextStyle,
                           )),
+                      // for category dropdown
                       timeSmallWidgetDropdown(
                         items: categoryList,
                         onItemSelected: (value) {
                           setState(() {
-                            _selectedCategory = value;// for existing category
+                            _selectedCategory = value; // for existing category
                           });
-                          if(_selectedCategory == '+ New'){
+                          if (_selectedCategory == '+ New') {
                             showDialogForCustom(
                                 context: context,
                                 dbService: dbService,
                                 theme: widget.theme,
-                                newCustomValue: (value) async{
-                                 int categoryId =  await dbService.addNewCategory(Category(categoryName: value));
-                                 print('Successfully registered Category id => $categoryId');
+                                newCustomValue: (value) async {
+                                  int categoryId = await dbService
+                                      .addNewCategory(
+                                      Category(categoryName: value));
+                                  print(
+                                      'Successfully registered Category id => $categoryId');
                                   await loadCategoryFromDB(); // reload after adding
-                                  _selectedCategory = value;// for new category
+                                  _selectedCategory = value; // for new category
                                 },
-                                animationSytle: _dropDownAnimatingStyle!,isRequiredIcon: false);
+                                animationSytle: _dropDownAnimatingStyle!,
+                                isRequiredIcon: false);
                             loadCategoryFromDB(); // for sync new category in dropdown
                           }
                           // You can store the selected value in a variable if needed
@@ -173,6 +188,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                           ),
                         ),
                       ),
+                      // for start time ( time picker)
                       timeSmallWidget(
                           fun: () async {
                             TimeOfDay? startTime = await timePicker(context);
@@ -183,11 +199,20 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             }
                           },
                           icon: Icons.access_alarm,
+                          isRemainRequiredFields: isRemainRequiredFields &&
+                              _selectedStartTime == null,
                           width: 90,
                           textWidget: Text(
                             _selectedStartTime ?? 'start time',
-                            style: widget.theme.smallTextStyle,
+                            style: GoogleFonts.lato(textStyle: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.normal,
+                                color: (isRemainRequiredFields &&
+                                    _selectedStartTime == null)
+                                    ? Colors.red
+                                    : AppThemeData.blackColor)),
                           )),
+                      //for end time ( time picker)
                       timeSmallWidget(
                           fun: () async {
                             TimeOfDay? endTime = await timePicker(context);
@@ -198,11 +223,22 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             }
                           },
                           icon: Icons.access_alarm,
+                          isRemainRequiredFields: isRemainRequiredFields &&
+                              _selectedEndTime == null,
+                          //
                           width: 90,
                           textWidget: Text(
                             _selectedEndTime ?? 'end time',
-                            style: widget.theme.smallTextStyle,
+                            style: GoogleFonts.lato(textStyle: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.normal,
+                                color: (isRemainRequiredFields &&
+                                    _selectedEndTime == null)
+                                    ? Colors.red
+                                    : AppThemeData.blackColor)),
                           )),
+
+                      // for repeat dropdown (daily,weekly,...)
                       timeSmallWidgetDropdown(
                         items: AppData.repeatDropDown,
                         onItemSelected: (value) {
@@ -212,15 +248,17 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                           if (_selectedRepeat == 'Custom') {
                             showDialogForCustom(
                                 context: context,
-                                dbService:  dbService,
+                                dbService: dbService,
                                 theme: widget.theme,
-                                newCustomValue:  (value) {
-                                  _repeatInterval = int.parse(value);// for new repeat value
+                                newCustomValue: (value) {
+                                  _repeatInterval =
+                                      int.parse(value); // for new repeat value
                                 },
-                                repeatType: (value){
+                                repeatType: (value) {
                                   _repeatUnit = value;
                                 },
-                                animationSytle: _dropDownAnimatingStyle!, isRequiredIcon: true);
+                                animationSytle: _dropDownAnimatingStyle!,
+                                isRequiredIcon: true);
                           }
                           // You can store the selected value in a variable if needed
                         },
@@ -231,27 +269,35 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                           child: Text(
                             overflow: TextOverflow.ellipsis,
                             softWrap: true,
-                            _selectedRepeat != 'Custom' ? _selectedRepeat??'Repeat' : '$_repeatInterval $_repeatUnit',
+                            _selectedRepeat != 'Custom' ? _selectedRepeat ??
+                                'Repeat' : '$_repeatInterval $_repeatUnit',
                             style: widget.theme.smallTextStyle,
                           ),
                         ),
                       ),
                       timeSmallWidget(
-                          fun: ()async {
-                           Duration? selectedReminder = await pickReminderTime(context);
-                           String reminder = '${selectedReminder!.inHours} and ${selectedReminder.inMinutes} and ${selectedReminder.inDays}';
-                           print(reminder);
-                           int reminderMinutes = selectedReminder.inMinutes;
-                           int reminderHour = reminderMinutes ~/ 60;
-                           int reminderMin = reminderMinutes % 60;
-                           setState(() {
-                             _selectedReminder = reminderHour != 0 ? '$reminderHour h : $reminderMin m' : '$reminderMin m';
-                           });
+                          fun: () async {
+                            Duration? selectedReminder = await pickReminderTime(
+                                context);
+                            String reminder = '${selectedReminder!
+                                .inHours} and ${selectedReminder
+                                .inMinutes} and ${selectedReminder.inDays}';
+                            print("Reminder $reminder");
+                            int reminderMinutes = selectedReminder.inMinutes;
+                            int reminderHour = reminderMinutes ~/ 60;
+                            int reminderMin = reminderMinutes % 60;
+                            setState(() {
+                              _selectedReminder = reminderHour != 0
+                                  ? '$reminderHour h : $reminderMin m'
+                                  : '$reminderMin m';
+                              _selectedReminderMinutes =
+                                  reminderMinutes; // to store in db ( only store store minutes in db)
+                            });
                           },
                           icon: Icons.timer,
                           width: 90,
                           textWidget: Text(
-                            _selectedReminder??'Reminder',
+                            _selectedReminder ?? 'Reminder',
                             style: widget.theme.smallTextStyle,
                           )),
                       timeSmallWidgetDropdown(
@@ -263,6 +309,8 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                           // You can store the selected value in a variable if needed
                         },
                         icon: Icons.low_priority_rounded,
+                        isRemainRequiredFields: isRemainRequiredFields &&
+                            _selectedPriority == null,
                         animationSytle: _dropDownAnimatingStyle!,
                         width: 90,
                         textWidget: Flexible(
@@ -270,7 +318,13 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             overflow: TextOverflow.ellipsis,
                             softWrap: true,
                             _selectedPriority ?? 'Priority',
-                            style: widget.theme.smallTextStyle,
+                            style: GoogleFonts.lato(textStyle: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.normal,
+                                color: (isRemainRequiredFields &&
+                                    _selectedPriority == null)
+                                    ? Colors.red
+                                    : AppThemeData.blackColor)),
                           ),
                         ),
                       )
@@ -278,14 +332,36 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                   ),
                 ),
                 ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      if (descController.text.isEmpty ||
+                          _selectedStartTime == null ||
+                          _selectedStartTime!.isEmpty ||
+                          _selectedEndTime == null ||
+                          _selectedEndTime!.isEmpty ||
+                          _selectedPriority == null ||
+                          _selectedPriority!.isEmpty) {
+                        Get.snackbar('Error', 'Please select required data',
+                            backgroundColor: Colors.red);
+                        setState(() {
+                          isRemainRequiredFields =
+                          true; // to change red color for mandatory fields icons
+                        });
+                      } else {
+                        Task task = Task(desc: descController.text,
+                            date: DateTime.parse(_selectedDate),
+                            startTime: _selectedStartTime!,
+                            endTime: _selectedEndTime!,
+                            createdAt: DateTime.now());
+                        dbService.addTask(task);
+                      }
+                    },
                     style: ButtonStyle(
                         elevation: WidgetStatePropertyAll(20),
                         fixedSize: WidgetStatePropertyAll(Size(130, 47)),
                         shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20))),
                         backgroundColor:
-                            WidgetStatePropertyAll(AppThemeData.orangeColor)),
+                        WidgetStatePropertyAll(AppThemeData.orangeColor)),
                     child: Text(
                       'Submit',
                       style: TextStyle(
