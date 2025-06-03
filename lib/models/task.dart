@@ -7,14 +7,13 @@ class Task{
   String? category;
   String? repeat;
   int? repeatInterval;
-  String? repeatTimeUnit;
+  int? repeatTimeUnit;
   String? reminder;
   String? priority;
-  String status;
   DateTime createdAt;
 
   Task({this.id, required this.desc, required this.date,required this.startTime, required this.endTime, this.category
-  ,this.repeat, this.repeatInterval,this.repeatTimeUnit, this.reminder, this.priority,this.status = 'pending', required this.createdAt});
+  ,this.repeat = 'none', this.repeatInterval,this.repeatTimeUnit, this.reminder, this.priority, required this.createdAt});
 
   Map<String, dynamic> toMap() {
     return {
@@ -28,7 +27,6 @@ class Task{
       'repeatInterval': repeatInterval,
       'repeatTimeUnit': repeatTimeUnit,
       'priority': priority,
-      'status': status,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -46,7 +44,6 @@ class Task{
       repeatInterval: map['repeatInterval'],
       repeatTimeUnit: map['repeatTimeUnit'],
       priority: map['priority'],
-      status: map['status'],
       createdAt: DateTime.parse(map['created_at']),
     );
   }

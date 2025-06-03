@@ -8,6 +8,7 @@ class DBService {
   static Database? _db;
   static String _dbName = 'to_do_list.db';
   static String _tblTasks = 'tblTasks';
+  static String _tblTasksHistory = 'tblTasksHistory';
   static String _tblCategory = 'tblCategory';
 
   Future<Database> get _database async {
@@ -21,6 +22,15 @@ class DBService {
     String path = join(dbPath, _dbName);
     print('Successfully created table');
     return await openDatabase(path, version: 1, onCreate: (db, version) async {
+      //category table
+      await db.execute('''
+        CREATE TABLE $_tblCategory(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        categoryName TEXT)
+      ''');
+      //task table
+
+      //enum custom_repeat_unit is for repeat_unit
       await db.execute('''
             CREATE TABLE $_tblTasks(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,21 +38,28 @@ class DBService {
             date TEXT NOT NULL,
             start_time TEXT NOT NULL,
             end_time TEXT NOT NULL,
-            category TEXT,
+            category_id INTEGER,
             reminder TEXT,
             repeat TEXT,
             repeat_interval INTEGER,
-            repeat_unit TEXT,
+            repeat_unit INTEGER,
             priority TEXT,
-            status TEXT NOT NULL,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (category_id) REFERENCES $_tblCategory(id) ON DELETE CASCADE
             )
       ''');
+
       await db.execute('''
-        CREATE TABLE $_tblCategory(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        categoryName TEXT)
+        CREATE TABLE $_tblTasksHistory(
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         task_id INTEGER,
+         date TEXT,
+         completed_at TEXT,
+         status INTEGER,
+         FOREIGN KEY (task_id) REFERENCES $_tblTasks(id) ON DELETE CASCADE
+        )
       ''');
+
     });
   }
 
