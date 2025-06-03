@@ -1,8 +1,10 @@
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todolists/models/app_user_data.dart';
 import 'package:todolists/models/category.dart';
 import 'package:todolists/models/task.dart';
+import 'package:todolists/models/task_history.dart';
 
 class DBService {
   static Database? _db;
@@ -18,7 +20,7 @@ class DBService {
   }
 
   Future<Database> initDB() async {
-      String dbPath = await getDatabasesPath();
+    String dbPath = await getDatabasesPath();
     String path = join(dbPath, _dbName);
     print('Successfully created table');
     return await openDatabase(path, version: 1, onCreate: (db, version) async {
@@ -40,7 +42,7 @@ class DBService {
             end_time TEXT NOT NULL,
             category_id INTEGER,
             reminder TEXT,
-            repeat TEXT,
+            repeat_type TEXT,
             repeat_interval INTEGER,
             repeat_unit INTEGER,
             priority TEXT,
@@ -59,7 +61,6 @@ class DBService {
          FOREIGN KEY (task_id) REFERENCES $_tblTasks(id) ON DELETE CASCADE
         )
       ''');
-
     });
   }
 
@@ -70,13 +71,10 @@ class DBService {
 
   Future<List<String>> getCategories() async {
     final db = await _database;
-    print('get category');
     final List<Map<String, Object?>> map = await db.query(_tblCategory);
-   // return map.map((ele) => ele['categoryName'] as String).toList();
+    // return map.map((ele) => ele['categoryName'] as String).toList();
     return [
-      for (final {'categoryName': categoryName as String}
-          in map)
-        categoryName
+      for (final {'categoryName': categoryName as String} in map) categoryName
     ];
   }
 
@@ -85,5 +83,67 @@ class DBService {
 
     return db.insert(_tblTasks, task.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  // Future<List<Task>> getAllTasks() async {
+  //   final db = await _database;
+  //   List<Map<String, dynamic>> map = await db.query(_tblTasks);
+  //
+  //   return ;
+  // }
+
+  Future<void> insertTodayRepeatTasks() async {
+    final db = await _database;
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day); // keeps only date
+    final todayStr = DateFormat('yyyy-MM-dd').format(today);
+    final List<Map<String, dynamic>> repeatTasks = await db.query(
+      'tblTasks',
+      where: "repeat != ?",
+      whereArgs: ['none'],
+    );
+
+    for(var task in repeatTasks){
+      final taskId = task['id'];
+      final startDateStr = task['date'];
+      final repeatType =  task['repeat'];
+      final repeatInterval = task['repeat_interval']??1;
+      final repeatUnit  = task['repeat_unit']?? 'day';
+
+      DateTime startDate = DateFormat('yyyy-MM-dd').parse(startDateStr);
+      Duration difference = today.difference(startDate);
+
+      bool shouldRepeatToday = false;
+
+      if(repeatType == 'daily'){
+        shouldRepeatToday = difference.inDays % repeatInterval == 0;
+      }else if (repeatType == 'weekly'){
+        shouldRepeatToday = difference.inDays % (7 * repeatInterval) == 0;
+      }else if (repeatType == 'monthly') {
+        shouldRepeatToday = (today.year * 12 + today.month - (startDate.year * 12 + startDate.month)) % repeatInterval == 0 && today.day == startDate.day;
+      }else if (repeatType == 'custom') {
+        if (repeatUnit == 'day') {
+          shouldRepeatToday = difference.inDays % repeatInterval == 0;
+        } else if (repeatUnit == 'week') {
+          shouldRepeatToday = difference.inDays % (7 * repeatInterval) == 0;
+        } else if (repeatUnit == 'month') {
+          shouldRepeatToday = (today.year * 12 + today.month - (startDate.year * 12 + startDate.month)) % repeatInterval == 0 &&
+              today.day == startDate.day;
+        }
+      }
+
+      if(shouldRepeatToday) {
+        final List<Map<String, dynamic>> existing =await db.query(_tblTasksHistory, where: 'task_id = ? AND date = ?',whereArgs: [taskId, startDateStr]);
+        if(existing.isEmpty) {
+          await db.insert(_tblTasksHistory, {
+            'task_id': taskId,
+            'date': todayStr,
+            'completed_at': null,
+            'status': 0,
+          });
+          print("Successfully inserted history for task id $taskId");
+        }
+      }
+    }
   }
 }

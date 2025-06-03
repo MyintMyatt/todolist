@@ -9,4 +9,14 @@ class TaskHistory{
 
   TaskHistory({this.id, required this.taskId, required this.date,
     this.completedAt, this.status = 0}); // 0 => pending
+
+
+  Map<String, dynamic> toJson(){
+    return{
+      'task_id': taskId,
+      'date':date,
+      'completed_at': completedAt,
+      'status':status
+    };
+  }
 }

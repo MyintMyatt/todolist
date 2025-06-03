@@ -5,7 +5,7 @@ class Task {
   String startTime;
   String endTime;
   String? category;
-  String? repeat;
+  String repeatType;
   int? repeatInterval;
   int? repeatTimeUnit;
   String? reminder;
@@ -20,8 +20,8 @@ class Task {
       required this.startTime,
       required this.endTime,
       this.category,
-      this.repeat = 'none',
-      this.repeatInterval,
+      this.repeatType = 'none',
+      this.repeatInterval = 1,
       this.repeatTimeUnit,
       this.reminder,
       this.priority,
@@ -35,9 +35,9 @@ class Task {
       'end_time': endTime,
       'category': category,
       'reminder': reminder,
-      'repeat': repeat,
-      'repeatInterval': repeatInterval,
-      'repeatTimeUnit': repeatTimeUnit,
+      'repeat_type': repeatType,
+      'repeat_interval': repeatInterval,
+      'repeat_unit': repeatTimeUnit,
       'priority': priority,
       'created_at': createdAt.toIso8601String(),
     };
@@ -52,9 +52,9 @@ class Task {
       endTime: map['end_time'],
       category: map['category'],
       reminder: map['reminder'],
-      repeat: map['repeat'],
-      repeatInterval: map['repeatInterval'],
-      repeatTimeUnit: map['repeatTimeUnit'],
+      repeatType: map['repeat_type'],
+      repeatInterval: map['repeat_interval'],
+      repeatTimeUnit: map['repeat_unit'],
       priority: map['priority'],
       createdAt: DateTime.parse(map['created_at']),
     );

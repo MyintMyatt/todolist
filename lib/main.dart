@@ -2,10 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:todolists/screens/splash.dart';
+import 'package:todolists/services/db_service.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
+import 'package:workmanager/workmanager.dart';
 
-void main() async{
+//for work manager
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((taskName, inputData)async {
+    if(taskName == 'insertRepeatTasks') {
+      await DBService().insertTodayRepeatTasks();
+    }
+    return Future.value(true);
+  });
+
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   runApp(ToDoListApp());
