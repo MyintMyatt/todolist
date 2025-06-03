@@ -1,4 +1,4 @@
-class Task{
+class Task {
   int? id;
   String desc;
   DateTime date;
@@ -10,10 +10,22 @@ class Task{
   int? repeatTimeUnit;
   String? reminder;
   String? priority;
+
   DateTime createdAt;
 
-  Task({this.id, required this.desc, required this.date,required this.startTime, required this.endTime, this.category
-  ,this.repeat = 'none', this.repeatInterval,this.repeatTimeUnit, this.reminder, this.priority, required this.createdAt});
+  Task(
+      {this.id,
+      required this.desc,
+      required this.date,
+      required this.startTime,
+      required this.endTime,
+      this.category,
+      this.repeat = 'none',
+      this.repeatInterval,
+      this.repeatTimeUnit,
+      this.reminder,
+      this.priority,
+      required this.createdAt});
 
   Map<String, dynamic> toMap() {
     return {
@@ -47,6 +59,4 @@ class Task{
       createdAt: DateTime.parse(map['created_at']),
     );
   }
-
-
 }
