@@ -22,6 +22,8 @@ void callbackDispatcher() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+  await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  await Workmanager().registerPeriodicTask('uniqueName', taskName)
   runApp(ToDoListApp());
 }
 
