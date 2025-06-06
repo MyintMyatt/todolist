@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -197,10 +198,25 @@ class DBService {
 
       for(var task in repeatTasks) {
         final taskId = task['id'];
-        final startDate = task['start_date'];
+        final startDateStr = task['start_date'];
         final repeatType = task['repeat_type'];
-        final repeatInterval = task['repeat_interval'];
-        final repeatTimeUnit = task['repeat_unit'];
+        final repeatInterval = task['repeat_interval'] ?? 1;
+        final repeatTimeUnit = task['repeat_unit'] ?? 'day';
+
+
+        DateTime startDate = DateTime.parse(startDateStr);
+        Duration diff = d.difference(startDate);
+        bool shouldRepeat = false;
+
+        switch (repeatTimeUnit){
+          case 'daily':
+            shouldRepeat = diff.inDays % repeatInterval == 0;
+            break;
+          case 'monthly':
+            shouldRepeat = diff.
+        }
+
+
       }
 
     }
