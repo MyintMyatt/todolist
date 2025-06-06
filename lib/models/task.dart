@@ -30,7 +30,7 @@ class Task {
   Map<String, dynamic> toMap() {
     return {
       'desc': desc,
-      'date': date.toIso8601String(),
+      'start_date': date.toIso8601String(),
       'start_time': startTime,
       'end_time': endTime,
       'category': category,
@@ -47,7 +47,7 @@ class Task {
     return Task(
       id: map['id'],
       desc: map['desc'],
-      date: DateTime.parse(map['date']),
+      date: DateTime.parse(map['start_date']),
       startTime: map['start_time'],
       endTime: map['end_time'],
       category: map['category'],

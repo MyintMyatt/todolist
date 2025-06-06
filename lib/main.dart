@@ -10,20 +10,24 @@ import 'package:workmanager/workmanager.dart';
 //for work manager
 @pragma('vm:entry-point')
 void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData)async {
-    if(taskName == 'insertRepeatTasks') {
+  Workmanager().executeTask((taskName, inputData) async {
+    if (taskName == 'insertRepeatTasks') {
       await DBService().insertTodayRepeatTasks();
     }
     return Future.value(true);
   });
-
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
-  await Workmanager().registerPeriodicTask('uniqueName', taskName)
+  await Workmanager().registerPeriodicTask(
+      'repeatTaskInserter', 'insertRepeatTasks',
+      frequency: Duration(minutes: 5),
+      initialDelay: Duration(seconds: 30),
+      constraints: Constraints(
+          networkType: NetworkType.not_required, requiresCharging: false));
   runApp(ToDoListApp());
 }
 

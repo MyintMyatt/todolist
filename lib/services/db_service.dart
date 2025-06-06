@@ -12,6 +12,7 @@ class DBService {
   static String _tblTasks = 'tblTasks';
   static String _tblTasksHistory = 'tblTasksHistory';
   static String _tblCategory = 'tblCategory';
+  static String _tblSetting = 'tblSetting';
 
   Future<Database> get _database async {
     if (_db != null) return _db!;
@@ -37,7 +38,7 @@ class DBService {
             CREATE TABLE $_tblTasks(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             desc TEXT NOT NULL,
-            date TEXT NOT NULL,
+            start_date TEXT NOT NULL,
             start_time TEXT NOT NULL,
             end_time TEXT NOT NULL,
             category_id INTEGER,
@@ -61,7 +62,29 @@ class DBService {
          FOREIGN KEY (task_id) REFERENCES $_tblTasks(id) ON DELETE CASCADE
         )
       ''');
+
+      await db.execute('''
+        CREATE TABLE $_tblSetting(
+        key TEXT AUTOINCREMENT,
+        value TEXT
+        )
+      ''');
     });
+  }
+
+  Future<void> setSetting({required String key, required String value}) async {
+    final db = await _database;
+    await db.insert(_tblSetting, {'key': key, 'value': value},
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<String?> getSetting(String key) async {
+    final db = await _database;
+    final result =await db.query(_tblSetting, where: 'key = ?', whereArgs: [key]);
+    if(result.isNotEmpty){
+      return result.first['value'] as String;
+    }
+    return null;
   }
 
   Future<int> addNewCategory(Category category) async {
@@ -103,38 +126,50 @@ class DBService {
       whereArgs: ['none'],
     );
 
-    for(var task in repeatTasks){
+    for (var task in repeatTasks) {
       final taskId = task['id'];
-      final startDateStr = task['date'];
-      final repeatType =  task['repeat'];
-      final repeatInterval = task['repeat_interval']??1;
-      final repeatUnit  = task['repeat_unit']?? 'day';
+      final startDateStr = task['start_date'];
+      final repeatType = task['repeat'];
+      final repeatInterval = task['repeat_interval'] ?? 1;
+      final repeatUnit = task['repeat_unit'] ?? 'day';
 
       DateTime startDate = DateFormat('yyyy-MM-dd').parse(startDateStr);
       Duration difference = today.difference(startDate);
 
       bool shouldRepeatToday = false;
 
-      if(repeatType == 'daily'){
+      if (repeatType == 'daily') {
         shouldRepeatToday = difference.inDays % repeatInterval == 0;
-      }else if (repeatType == 'weekly'){
+      } else if (repeatType == 'weekly') {
         shouldRepeatToday = difference.inDays % (7 * repeatInterval) == 0;
-      }else if (repeatType == 'monthly') {
-        shouldRepeatToday = (today.year * 12 + today.month - (startDate.year * 12 + startDate.month)) % repeatInterval == 0 && today.day == startDate.day;
-      }else if (repeatType == 'custom') {
+      } else if (repeatType == 'monthly') {
+        shouldRepeatToday = (today.year * 12 +
+                        today.month -
+                        (startDate.year * 12 + startDate.month)) %
+                    repeatInterval ==
+                0 &&
+            today.day == startDate.day;
+      } else if (repeatType == 'custom') {
         if (repeatUnit == 'day') {
           shouldRepeatToday = difference.inDays % repeatInterval == 0;
         } else if (repeatUnit == 'week') {
           shouldRepeatToday = difference.inDays % (7 * repeatInterval) == 0;
         } else if (repeatUnit == 'month') {
-          shouldRepeatToday = (today.year * 12 + today.month - (startDate.year * 12 + startDate.month)) % repeatInterval == 0 &&
+          shouldRepeatToday = (today.year * 12 +
+                          today.month -
+                          (startDate.year * 12 + startDate.month)) %
+                      repeatInterval ==
+                  0 &&
               today.day == startDate.day;
         }
       }
 
-      if(shouldRepeatToday) {
-        final List<Map<String, dynamic>> existing =await db.query(_tblTasksHistory, where: 'task_id = ? AND date = ?',whereArgs: [taskId, startDateStr]);
-        if(existing.isEmpty) {
+      if (shouldRepeatToday) {
+        final List<Map<String, dynamic>> existing = await db.query(
+            _tblTasksHistory,
+            where: 'task_id = ? AND date = ?',
+            whereArgs: [taskId, startDateStr]);
+        if (existing.isEmpty) {
           await db.insert(_tblTasksHistory, {
             'task_id': taskId,
             'date': todayStr,
@@ -145,5 +180,31 @@ class DBService {
         }
       }
     }
+  }
+
+  Future<void> insertMissedRepeatTask() async{
+    final db = await _database;
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
+
+    String? lastRunStr = await getSetting('last_repeat_insert_date');
+    DateTime lastRunDate = lastRunStr != null ? DateTime.parse(lastRunStr!) : today.subtract(Duration(days: 1));
+
+
+    for(var d = lastRunDate; d.isBefore(today) || d.isAtSameMomentAs(today); d.add(Duration(days: 1))){
+      String dStr = DateFormat('yyyy-MM-dd').format(d);
+      final List<Map<String, dynamic>> repeatTasks = await db.query(_tblTasks,where: 'repeat_type != ?', whereArgs: ['none']);
+
+      for(var task in repeatTasks) {
+        final taskId = task['id'];
+        final startDate = task['start_date'];
+        final repeatType = task['repeat_type'];
+        final repeatInterval = task['repeat_interval'];
+        final repeatTimeUnit = task['repeat_unit'];
+      }
+
+    }
+
+
   }
 }
