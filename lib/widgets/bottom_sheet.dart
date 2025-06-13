@@ -38,9 +38,9 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   String?
   _selectedStartTime; // = TimeOfDay(hour: now.hour, minute: now.minute).format(context);
   String? _selectedEndTime;
-  String? _selectedCategory;
-  String? _selectedPriority;
-  String? _selectedRepeat;
+  String _selectedCategory = 'None';
+  String _selectedPriority = 'None';
+  String _selectedRepeat = 'None';
   int? _repeatInterval;
   String? _repeatUnit; // to show ui
   String? _selectedReminder; // to show ui
@@ -106,7 +106,8 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
               maxLines: 3,
               cursorColor: AppThemeData.greenColor,
               decoration: InputDecoration(
-                  hintText: 'write down task',
+                  hintText: 'write down task...',
+                  hintStyle: TextStyle(color: descController.text.isEmpty && isRemainRequiredFields ? Colors.red :Colors.grey),
                   contentPadding:
                   EdgeInsets.symmetric(horizontal: 13, vertical: 10),
                   filled: true,
@@ -348,6 +349,11 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             date: DateTime.parse(_selectedDate),
                             startTime: _selectedStartTime!,
                             endTime: _selectedEndTime!,
+                            category: _selectedCategory,
+                            repeatType: _selectedRepeat,
+                            repeatInterval: _repeatInterval,
+                            repeatTimeUnit: _repeatUnit,
+                            priority: _selectedPriority,
                             createdAt: DateTime.now());
                         dbService.addTask(task);
                       }

@@ -8,26 +8,26 @@ import 'package:todolists/themes/theme.dart';
 import 'package:workmanager/workmanager.dart';
 
 //for work manager
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) async {
-    if (taskName == 'insertRepeatTasks') {
-      await DBService().insertTodayRepeatTasks();
-    }
-    return Future.value(true);
-  });
-}
+// @pragma('vm:entry-point')
+// void callbackDispatcher() {
+//   Workmanager().executeTask((taskName, inputData) async {
+//     if (taskName == 'insertRepeatTasks') {
+//       await DBService().insertTodayRepeatTasks();
+//     }
+//     return Future.value(true);
+//   });
+// }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GetStorage.init();
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
-  await Workmanager().registerPeriodicTask(
-      'repeatTaskInserter', 'insertRepeatTasks',
-      frequency: Duration(minutes: 5),
-      initialDelay: Duration(seconds: 30),
-      constraints: Constraints(
-          networkType: NetworkType.not_required, requiresCharging: false));
+  // await GetStorage.init();
+  // await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  // await Workmanager().registerPeriodicTask(
+  //     'repeatTaskInserter', 'insertRepeatTasks',
+  //     frequency: Duration(minutes: 5),
+  //     initialDelay: Duration(seconds: 30),
+  //     constraints: Constraints(
+  //         networkType: NetworkType.not_required, requiresCharging: false));
   runApp(ToDoListApp());
 }
 

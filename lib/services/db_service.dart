@@ -49,6 +49,7 @@ class DBService {
             repeat_unit INTEGER,
             priority TEXT,
             created_at TEXT NOT NULL,
+            is_deleted INTEGER,
             FOREIGN KEY (category_id) REFERENCES $_tblCategory(id) ON DELETE CASCADE
             )
       ''');
@@ -66,7 +67,7 @@ class DBService {
 
       await db.execute('''
         CREATE TABLE $_tblSetting(
-        key TEXT AUTOINCREMENT,
+        key TEXT PRIMARY KEY,
         value TEXT
         )
       ''');
@@ -81,8 +82,9 @@ class DBService {
 
   Future<String?> getSetting(String key) async {
     final db = await _database;
-    final result =await db.query(_tblSetting, where: 'key = ?', whereArgs: [key]);
-    if(result.isNotEmpty){
+    final result =
+        await db.query(_tblSetting, where: 'key = ?', whereArgs: [key]);
+    if (result.isNotEmpty) {
       return result.first['value'] as String;
     }
     return null;
@@ -139,23 +141,23 @@ class DBService {
 
       bool shouldRepeatToday = false;
 
-      if (repeatType == 'daily') {
+      if (repeatType == 'Daily') {
         shouldRepeatToday = difference.inDays % repeatInterval == 0;
-      } else if (repeatType == 'weekly') {
+      } else if (repeatType == 'Weekly') {
         shouldRepeatToday = difference.inDays % (7 * repeatInterval) == 0;
-      } else if (repeatType == 'monthly') {
+      } else if (repeatType == 'Monthly') {
         shouldRepeatToday = (today.year * 12 +
                         today.month -
                         (startDate.year * 12 + startDate.month)) %
                     repeatInterval ==
                 0 &&
             today.day == startDate.day;
-      } else if (repeatType == 'custom') {
-        if (repeatUnit == 'day') {
+      } else if (repeatType == 'Custom') {
+        if (repeatUnit == 'Days') {
           shouldRepeatToday = difference.inDays % repeatInterval == 0;
-        } else if (repeatUnit == 'week') {
+        } else if (repeatUnit == 'Weeks') {
           shouldRepeatToday = difference.inDays % (7 * repeatInterval) == 0;
-        } else if (repeatUnit == 'month') {
+        } else if (repeatUnit == 'Months') {
           shouldRepeatToday = (today.year * 12 +
                           today.month -
                           (startDate.year * 12 + startDate.month)) %
@@ -183,44 +185,100 @@ class DBService {
     }
   }
 
-  Future<void> insertMissedRepeatTask() async{
+  Future<void> insertMissedRepeatTask() async {
+    print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+    print('inserting task........');
+    print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+
     final db = await _database;
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
-
+    final todayStr = DateFormat('yyyy-MM-dd').format(today);
     String? lastRunStr = await getSetting('last_repeat_insert_date');
-    DateTime lastRunDate = lastRunStr != null ? DateTime.parse(lastRunStr!) : today.subtract(Duration(days: 1));
+    DateTime lastRunDate = lastRunStr != null
+        ? DateTime.parse(lastRunStr!)
+        : today.subtract(Duration(days: 1));
 
-
-    for(var d = lastRunDate; d.isBefore(today) || d.isAtSameMomentAs(today); d.add(Duration(days: 1))){
+    for (var d = lastRunDate;
+        d.isBefore(today) || d.isAtSameMomentAs(today);
+        d = d.add(Duration(days: 1))) {
       String dStr = DateFormat('yyyy-MM-dd').format(d);
-      final List<Map<String, dynamic>> repeatTasks = await db.query(_tblTasks,where: 'repeat_type != ?', whereArgs: ['none']);
+      final List<Map<String, dynamic>> repeatTasks = await db
+          .query(_tblTasks, where: 'repeat_type != ?', whereArgs: ['none']);
 
-      for(var task in repeatTasks) {
+      print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+      print('LastRun Date => $d');
+      print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+
+      for (var task in repeatTasks) {
         final taskId = task['id'];
         final startDateStr = task['start_date'];
         final repeatType = task['repeat_type'];
         final repeatInterval = task['repeat_interval'] ?? 1;
         final repeatTimeUnit = task['repeat_unit'] ?? 'day';
 
-
         DateTime startDate = DateTime.parse(startDateStr);
         Duration diff = d.difference(startDate);
         bool shouldRepeat = false;
 
-        switch (repeatTimeUnit){
-          case 'daily':
+        print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+        print('Repeat Task => $taskId ,Start Date => $startDateStr');
+        print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+
+        switch (repeatType) {
+          case 'Daily':
             shouldRepeat = diff.inDays % repeatInterval == 0;
             break;
-          case 'monthly':
-            shouldRepeat = diff.
+          case 'Weekly':
+            shouldRepeat = diff.inDays % (7 * repeatInterval) == 0;
+            break;
+          case 'Monthly':
+            shouldRepeat = (d.year * 12 +
+                        d.month -
+                        (startDate.year * 12 + startDate.month) %
+                            repeatInterval ==
+                    0 &&
+                d.day == startDate.day);
+            break;
+          case 'Custom':
+            {
+              switch (repeatTimeUnit) {
+                case ''
+                    'Days':
+                  shouldRepeat = diff.inDays % repeatInterval == 0;
+                  break;
+                case 'Weeks':
+                  shouldRepeat = diff.inDays % (7 * repeatInterval) == 0;
+                  break;
+                case 'Months':
+                  shouldRepeat = (d.year * 12 +
+                              d.month -
+                              (startDate.year * 12 + startDate.month) %
+                                  repeatInterval ==
+                          0 &&
+                      d.day == startDate.day);
+                  break;
+              }
+              break;
+            }
         }
 
-
+        if (shouldRepeat) {
+          final exits = await db.query(_tblTasksHistory,
+              where: 'task_id = ? AND date = ?', whereArgs: [taskId, dStr]);
+          if (exits.isEmpty) {
+            int id = await db.insert(_tblTasksHistory, {
+              'task_id': taskId,
+              'date': dStr,
+              'completed_at': null,
+              'status': 0
+            });
+            print(
+                "Inserted missed repeat task for $taskId on $dStr for id is $id");
+          }
+        }
       }
-
     }
-
-
+    await setSetting(key: 'last_repeat_insert_date', value: todayStr);
   }
 }

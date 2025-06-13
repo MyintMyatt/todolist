@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:todolists/screens/home.dart';
+import 'package:todolists/services/db_service.dart';
 import 'package:todolists/themes/theme.dart';
 
 class Splash extends StatefulWidget {
@@ -13,6 +14,16 @@ class Splash extends StatefulWidget {
 
 class _SplashState extends State<Splash> {
   AppThemeData appThemeData = AppThemeData();
+  
+  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Future.microtask(() async{
+      await DBService().insertMissedRepeatTask();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
