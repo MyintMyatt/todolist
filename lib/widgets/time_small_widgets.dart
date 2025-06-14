@@ -19,7 +19,8 @@ Widget timeSmallWidget(
         decoration: BoxDecoration(
             gradient: LinearGradient(colors: [ // your current green
               AppThemeData.greenColor, // your current green
-              AppThemeData.gradientGreenColor, // your current green
+              AppThemeData.greenColor,
+              //  AppThemeData.gradientGreenColor, // your current green
 
             ]),
             borderRadius: BorderRadius.circular(20),

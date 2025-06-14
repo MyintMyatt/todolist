@@ -33,7 +33,8 @@ Widget timeSmallWidgetDropdown({
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [
           AppThemeData.greenColor,
-          AppThemeData.gradientGreenColor,
+          AppThemeData.greenColor,
+         // AppThemeData.gradientGreenColor,
         ]),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [

@@ -1,22 +1,56 @@
 import 'package:todolists/enum/task_status.dart';
 
-class TaskHistory{
-  int? id;
+class TaskHistory {
   int taskId;
+  String desc;
   DateTime date;
+  String startTime;
+  String endTime;
+  String categoryName;
+  String? reminder;
+  String repeatType;
+  int? repeatInterval;
+  String? repeatTimeUnit; // day or week or month
+  String priority;
+  DateTime createdDate;
   String? completedAt;
   int status;
+  int isDeleted;
 
-  TaskHistory({this.id, required this.taskId, required this.date,
-    this.completedAt, this.status = 0}); // 0 => pending
+  TaskHistory(
+      {required this.taskId,
+      required this.desc,
+      required this.date,
+      required this.startTime,
+      required this.endTime,
+      required this.categoryName,
+      this.reminder,
+      required this.repeatType,
+      this.repeatInterval,
+      this.repeatTimeUnit,
+      required this.priority,
+      required this.createdDate,
+      this.completedAt,
+      this.status = 0,
+      required this.isDeleted}); // 0 => pending
 
-
-  Map<String, dynamic> toJson(){
-    return{
-      'task_id': taskId,
-      'date':date,
-      'completed_at': completedAt,
-      'status':status
-    };
+  factory TaskHistory.fromMap(Map<String, dynamic> map) {
+    return TaskHistory(
+      taskId: map['id'] as int,
+      desc: map['desc'],
+      date: DateTime.parse(map['start_date']),
+      startTime: map['start_time'],
+      endTime: map['end_time'],
+      categoryName: map['categoryName'],
+      reminder: map['reminder'],
+      repeatType: map['repeat_type'],
+      repeatInterval: map['repeat_interval']?? 0,
+      repeatTimeUnit: map['repeat_unit'],
+      priority: map['priority'],
+      createdDate: DateTime.parse(map['created_at']),
+      isDeleted: map['is_deleted'] as int,
+      completedAt: map['completed_at'],
+      status: map['status'] as int,
+    );
   }
 }

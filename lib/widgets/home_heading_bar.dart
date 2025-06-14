@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:todolists/screens/splash.dart';
 
 import '../services/theme_service.dart';
 import '../themes/theme.dart';
@@ -23,8 +25,11 @@ homeHeadingBar(){
           )
         ],
       ),
-      CircleAvatar(
-        backgroundImage: AssetImage('images/avator.png'),
+      InkWell(
+        onTap: ()=> Get.to(() => Splash()),
+        child: CircleAvatar(
+          backgroundImage: AssetImage('images/avator.png'),
+        ),
       )
     ],
   );

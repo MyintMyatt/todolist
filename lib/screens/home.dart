@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:todolists/models/task.dart';
+import 'package:todolists/models/task_history.dart';
 import 'package:todolists/services/db_service.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
@@ -23,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   DateTime? _selectedDate;
 
-  List<Task> tasksList = [];
+  List<TaskHistory> taskHistoryList = [];
 
   @override
   void initState() {
@@ -31,9 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     Future.microtask(() async{
       print('loading task.....');
-      List<Task> list = await DBService().getAllTasks();
+      List<TaskHistory> list = await DBService().getAllTaskHistory();
       setState(() {
-        tasksList = list;
+        taskHistoryList = list;
       });
     });
   }
@@ -49,15 +51,24 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: EdgeInsets.only(left: 15, right: 15, top: 70),
         child: Column(
           children: [homeHeadingBar(),
-          tasksList.length == 0 ? Text('No task'):
+            taskHistoryList.length == 0 ? Text('No task'):
             Expanded(
               child: ListView.builder(
-              itemCount: tasksList.length,
+              itemCount: taskHistoryList.length,
                 itemBuilder: (context, index){
-                Task task = tasksList[index];
+                TaskHistory task = taskHistoryList[index];
                   return Card(
                     child: ListTile(
                       title: Text(task.desc),
+                      subtitle: Row(
+                        children: [
+                          Text(DateFormat('yyyy-MM-dd').format(task.date)),
+                          SizedBox(width: 10,),
+                          Text(task.repeatType),
+                          SizedBox(width: 10,),
+                          Text('${task.startTime} - ${task.endTime}')
+                        ],
+                      ),
                     ),
                   );
 

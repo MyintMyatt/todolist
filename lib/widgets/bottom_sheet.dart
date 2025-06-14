@@ -65,19 +65,23 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
 
   loadCategoryFromDB() async {
     List<Category> list = await dbService.getCategories();
+    List<String> stringList = [];
+    print(list);
     for(Category c in list) {
-      categoryNameList.add(c.categoryName);
+      stringList.add(c.categoryName);
     }
+    stringList.add('+ New');
+
     setState(() {
       categoryMasterList = list;
+      categoryNameList = stringList;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     List<String> categoryList = categoryNameList;
-
-    categoryList.add('+ New');
+    print(categoryList);
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(
@@ -348,10 +352,12 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                           true; // to change red color for mandatory fields icons
                         });
                       } else {
-                        int _selectedCategoryID = -1;
+                        _selectedCategory = _selectedCategory??"None";
+                        int _selectedCategoryID = -1; // none
                         for(Category c in categoryMasterList){
                           if(_selectedCategory == c.categoryName){
                             _selectedCategoryID = c.id!;
+                            print('Category ID => $_selectedCategoryID');
                           }
                         };
                         Task task = Task(desc: descController.text,
@@ -363,8 +369,9 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             repeatInterval: _repeatInterval,
                             repeatTimeUnit: _repeatUnit,
                             priority: _selectedPriority,
-                            createdAt: DateTime.now());
-                        dbService.addTask(task);
+                            createdAt: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day));
+                       int id = await dbService.addTask(task);// add task header
+                        dbService.addTaskHistory(taskID: id, date: _selectedDate); // add task history
                       }
                     },
                     style: ButtonStyle(

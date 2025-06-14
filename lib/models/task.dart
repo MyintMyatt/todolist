@@ -20,7 +20,7 @@ class Task {
       required this.date,
       required this.startTime,
       required this.endTime,
-      this.category,
+      this.category = -1,
       this.repeatType = 'None',
       this.repeatInterval = 1,//1 day, 2 week, 3months
       this.repeatTimeUnit,//day, month, week
