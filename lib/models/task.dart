@@ -4,7 +4,7 @@ class Task {
   DateTime date;
   String startTime;
   String endTime;
-  String? category;
+  int? category;
   String repeatType;
   int? repeatInterval;
   String? repeatTimeUnit;
@@ -35,7 +35,7 @@ class Task {
       'start_date': date.toIso8601String(),
       'start_time': startTime,
       'end_time': endTime,
-      'category': category,
+      'category_id': category,
       'reminder': reminder,
       'repeat_type': repeatType,
       'repeat_interval': repeatInterval,
@@ -53,7 +53,7 @@ class Task {
       date: DateTime.parse(map['start_date']),
       startTime: map['start_time'],
       endTime: map['end_time'],
-      category: map['category'],
+      category: map['category_id'],
       reminder: map['reminder'],
       repeatType: map['repeat_type'],
       repeatInterval: map['repeat_interval'],

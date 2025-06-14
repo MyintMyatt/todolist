@@ -33,12 +33,12 @@ class AddTaskBottomSheet extends StatefulWidget {
 class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   AnimationStyle? _dropDownAnimatingStyle;
   TextEditingController descController = TextEditingController();
-
-  String _selectedDate = DateFormat('dd').format(DateTime.now()); //date
+  String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String _selectedDateUI = DateFormat('dd').format(DateTime.now()); //date
   String?
   _selectedStartTime; // = TimeOfDay(hour: now.hour, minute: now.minute).format(context);
   String? _selectedEndTime;
-  String _selectedCategory = 'None';
+  String? _selectedCategory;
   String _selectedPriority = 'None';
   String _selectedRepeat = 'None';
   int? _repeatInterval;
@@ -47,8 +47,9 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   int? _selectedReminderMinutes; // to store in db
   bool isRemainRequiredFields = false; // to change red color for mandatory fields icons
 
-  List<String> newCategoryList = [];
   late DBService dbService;
+  List<Category> categoryMasterList = [];
+  List<String> categoryNameList = [];
 
   @override
   void initState() {
@@ -63,15 +64,18 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   }
 
   loadCategoryFromDB() async {
-    List<String> list = await dbService.getCategories();
+    List<Category> list = await dbService.getCategories();
+    for(Category c in list) {
+      categoryNameList.add(c.categoryName);
+    }
     setState(() {
-      newCategoryList = list;
+      categoryMasterList = list;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<String> categoryList = AppData().categoryDropDown + newCategoryList;
+    List<String> categoryList = categoryNameList;
 
     categoryList.add('+ New');
     return SingleChildScrollView(
@@ -137,14 +141,15 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             await datePicker(context: context);
                             if (pickedDate != null) {
                               setState(() {
-                                _selectedDate =
+                                _selectedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
+                                _selectedDateUI =
                                     DateFormat('dd').format(pickedDate);
                               });
                             }
                           },
                           icon: Icons.calendar_month_rounded,
                           textWidget: Text(
-                            _selectedDate,
+                            _selectedDateUI,
                             style: widget.theme.smallTextStyle,
                           )),
                       // for category dropdown
@@ -163,8 +168,6 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                                   int categoryId = await dbService
                                       .addNewCategory(
                                       Category(categoryName: value));
-                                  print(
-                                      'Successfully registered Category id => $categoryId');
                                   await loadCategoryFromDB(); // reload after adding
                                   _selectedCategory = value; // for new category
                                 },
@@ -345,11 +348,17 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                           true; // to change red color for mandatory fields icons
                         });
                       } else {
+                        int _selectedCategoryID = -1;
+                        for(Category c in categoryMasterList){
+                          if(_selectedCategory == c.categoryName){
+                            _selectedCategoryID = c.id!;
+                          }
+                        };
                         Task task = Task(desc: descController.text,
                             date: DateTime.parse(_selectedDate),
                             startTime: _selectedStartTime!,
                             endTime: _selectedEndTime!,
-                            category: _selectedCategory,
+                            category: _selectedCategoryID,
                             repeatType: _selectedRepeat,
                             repeatInterval: _repeatInterval,
                             repeatTimeUnit: _repeatUnit,

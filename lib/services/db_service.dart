@@ -71,6 +71,10 @@ class DBService {
         value TEXT
         )
       ''');
+
+      db.rawInsert('''
+      INSERT INTO $_tblCategory (categoryName) VALUES ("Personal"),("Work"),("Education"),("Health"),("Family"),("Birthday");
+      ''');
     });
   }
 
@@ -94,15 +98,14 @@ class DBService {
     final db = await _database;
     return db.insert(_tblCategory, category.toMap());
   }
-
-  Future<List<String>> getCategories() async {
+  Future<List<Category>> getCategories() async {
     final db = await _database;
     final List<Map<String, Object?>> map = await db.query(_tblCategory);
-    // return map.map((ele) => ele['categoryName'] as String).toList();
-    return [
-      for (final {'categoryName': categoryName as String} in map) categoryName
-    ];
+
+    return map.map((e) => Category(id: e['id'] as int, categoryName:  e['categoryName'] as String)).toList();
   }
+
+
 
   Future<int> addTask(Task task) async {
     final db = await _database;
@@ -111,12 +114,16 @@ class DBService {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // Future<List<Task>> getAllTasks() async {
-  //   final db = await _database;
-  //   List<Map<String, dynamic>> map = await db.query(_tblTasks);
-  //
-  //   return ;
-  // }
+  Future<List<Task>> getAllTasks() async {
+    final db = await _database;
+    List<Map<String, dynamic>> map = await db.query(_tblTasks);
+    List<Task> tasksList = [];
+    for(Map<String, dynamic> task in map) {
+     Task t = Task.fromMap(task);
+     tasksList.add(t);
+    }
+    return tasksList;
+  }
 
   Future<void> insertTodayRepeatTasks() async {
     final db = await _database;

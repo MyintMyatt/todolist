@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:todolists/models/task.dart';
+import 'package:todolists/services/db_service.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
 import 'package:todolists/widgets/bottom_nav_bar.dart';
@@ -21,19 +23,49 @@ class _HomeScreenState extends State<HomeScreen> {
 
   DateTime? _selectedDate;
 
+  List<Task> tasksList = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Future.microtask(() async{
+      print('loading task.....');
+      List<Task> list = await DBService().getAllTasks();
+      setState(() {
+        tasksList = list;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: themeService.loadThemeMode
           ? AppThemeData.blackBgColor
           : AppThemeData.whiteBgColor,
-      body: SingleChildScrollView(
-          child: Padding(
+      body:
+           Padding(
         padding: EdgeInsets.only(left: 15, right: 15, top: 70),
         child: Column(
-          children: [homeHeadingBar()],
+          children: [homeHeadingBar(),
+          tasksList.length == 0 ? Text('No task'):
+            Expanded(
+              child: ListView.builder(
+              itemCount: tasksList.length,
+                itemBuilder: (context, index){
+                Task task = tasksList[index];
+                  return Card(
+                    child: ListTile(
+                      title: Text(task.desc),
+                    ),
+                  );
+
+                }),
+            )
+          ],
         ),
-      )),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppThemeData.greenColor,
