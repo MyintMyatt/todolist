@@ -1,0 +1,2 @@
+/home/orion/FlutterProject/todolist/android/app/.cxx/Debug/496h3z1n/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/orion/FlutterProject/todolist/android/app/.cxx/Debug/496h3z1n/armeabi-v7a/CMakeFiles/rebuild_cache.dir
