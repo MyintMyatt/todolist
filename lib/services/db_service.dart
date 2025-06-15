@@ -58,7 +58,7 @@ class DBService {
         CREATE TABLE $_tblTasksHistory(
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          task_id INTEGER,
-         date TEXT,
+         today_date TEXT,
          completed_at TEXT,
          status INTEGER,
          FOREIGN KEY (task_id) REFERENCES $_tblTasks(id) ON DELETE CASCADE
@@ -122,7 +122,7 @@ class DBService {
     final db = await _database;
     return db.insert(_tblTasksHistory, {
       'task_id': taskID,
-      'date': date,
+      'today_date': date,
       'completed_at': null,
       'status': 0
     });
@@ -196,7 +196,7 @@ class DBService {
         if (existing.isEmpty) {
           await db.insert(_tblTasksHistory, {
             'task_id': taskId,
-            'date': todayStr,
+            'today_date': todayStr,
             'completed_at': null,
             'status': 0,
           });
@@ -228,12 +228,6 @@ class DBService {
       final List<Map<String, dynamic>> repeatTasks = await db
           .query(_tblTasks, where: 'repeat_type != ?', whereArgs: ['None']);
       print(repeatTasks);
-      print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-      print('LastRun Date => $d');
-      print('d.isBefore(today) => ${d.isBefore(today)}');
-      print('d.isAtSameMomentAs(today) => ${d.isAtSameMomentAs(today)}');
-      print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-
       for (var task in repeatTasks) {
         final taskId = task['id'];
         final startDateStr = task['start_date'];
@@ -245,9 +239,6 @@ class DBService {
         Duration diff = d.difference(startDate);
         bool shouldRepeat = false;
 
-        print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-        print('Repeat Task => $taskId ,Start Date => $startDateStr');
-        print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
 
         switch (repeatType) {
           case 'Daily':
@@ -257,9 +248,9 @@ class DBService {
             shouldRepeat = diff.inDays % (7 * repeatInterval) == 0;
             break;
           case 'Monthly':
-            shouldRepeat = (d.year * 12 +
+            shouldRepeat = ((d.year * 12 +
                         d.month -
-                        (startDate.year * 12 + startDate.month) %
+                        (startDate.year * 12 + startDate.month)) %
                             repeatInterval ==
                     0 &&
                 d.day == startDate.day);
@@ -275,9 +266,9 @@ class DBService {
                   shouldRepeat = diff.inDays % (7 * repeatInterval) == 0;
                   break;
                 case 'Months':
-                  shouldRepeat = (d.year * 12 +
+                  shouldRepeat = ((d.year * 12 +
                               d.month -
-                              (startDate.year * 12 + startDate.month) %
+                              (startDate.year * 12 + startDate.month)) %
                                   repeatInterval ==
                           0 &&
                       d.day == startDate.day);
@@ -288,13 +279,12 @@ class DBService {
         }
 
         if (shouldRepeat) {
-          print('should repeat task $shouldRepeat');
           final exits = await db.query(_tblTasksHistory,
-              where: 'task_id = ? AND date = ?', whereArgs: [taskId, dStr]);
+              where: 'task_id = ? AND today_date = ?', whereArgs: [taskId, dStr]);
           if (exits.isEmpty) {
             int id = await db.insert(_tblTasksHistory, {
               'task_id': taskId,
-              'date': dStr,
+              'today_date': dStr,
               'completed_at': null,
               'status': 0
             });
@@ -306,7 +296,6 @@ class DBService {
     }
     List<Map<String, dynamic>> history =
         await db.rawQuery('SELECT * FROM $_tblTasksHistory');
-    print("HHHHHHHHHHHHHHHHHHHHHHHHHH");
     print(history);
     await setSetting(key: 'last_repeat_insert_date', value: todayStr);
   }
@@ -314,7 +303,7 @@ class DBService {
   Future<List<TaskHistory>> getAllTaskHistory() async {
     final db = await _database;
     List<Map<String, dynamic>> tasksHistoryList = await db.rawQuery('''
-    SELECT t.*,  th.completed_at,th.status, c.categoryName FROM $_tblTasks t JOIN $_tblTasksHistory th ON t.id = th.task_id LEFT JOIN $_tblCategory c ON t.category_id = c.id
+    SELECT t.*, th.today_date,th.completed_at,th.status, c.categoryName FROM $_tblTasks t JOIN $_tblTasksHistory th ON t.id = th.task_id LEFT JOIN $_tblCategory c ON t.category_id = c.id
     ''');
     print(tasksHistoryList);
     return tasksHistoryList.map((e) => TaskHistory.fromMap(e)).toList();

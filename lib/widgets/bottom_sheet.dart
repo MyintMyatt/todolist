@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:todolists/models/AppData.dart';
 import 'package:todolists/models/category.dart';
 import 'package:todolists/models/task.dart';
+import 'package:todolists/screens/home.dart';
 import 'package:todolists/services/db_service.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
@@ -365,6 +366,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             startTime: _selectedStartTime!,
                             endTime: _selectedEndTime!,
                             category: _selectedCategoryID,
+                            reminder: _selectedReminder,
                             repeatType: _selectedRepeat,
                             repeatInterval: _repeatInterval,
                             repeatTimeUnit: _repeatUnit,
@@ -372,6 +374,7 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                             createdAt: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day));
                        int id = await dbService.addTask(task);// add task header
                         dbService.addTaskHistory(taskID: id, date: _selectedDate); // add task history
+                        Get.to(()=> HomeScreen());
                       }
                     },
                     style: ButtonStyle(

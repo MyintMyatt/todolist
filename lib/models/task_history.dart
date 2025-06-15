@@ -3,7 +3,8 @@ import 'package:todolists/enum/task_status.dart';
 class TaskHistory {
   int taskId;
   String desc;
-  DateTime date;
+  DateTime startDate;
+  DateTime todayDate;
   String startTime;
   String endTime;
   String categoryName;
@@ -20,7 +21,8 @@ class TaskHistory {
   TaskHistory(
       {required this.taskId,
       required this.desc,
-      required this.date,
+      required this.startDate,
+        required this.todayDate,
       required this.startTime,
       required this.endTime,
       required this.categoryName,
@@ -38,7 +40,8 @@ class TaskHistory {
     return TaskHistory(
       taskId: map['id'] as int,
       desc: map['desc'],
-      date: DateTime.parse(map['start_date']),
+      startDate: DateTime.parse(map['start_date']),
+      todayDate: DateTime.parse(map['today_date']),
       startTime: map['start_time'],
       endTime: map['end_time'],
       categoryName: map['categoryName'],

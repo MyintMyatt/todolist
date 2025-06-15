@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: Text(task.desc),
                       subtitle: Row(
                         children: [
-                          Text(DateFormat('yyyy-MM-dd').format(task.date)),
+                          Text(DateFormat('yyyy-MM-dd').format(task.todayDate)),
                           SizedBox(width: 10,),
                           Text(task.repeatType),
                           SizedBox(width: 10,),

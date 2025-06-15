@@ -5,7 +5,7 @@ import 'package:todolists/screens/splash.dart';
 import 'package:todolists/services/db_service.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
-import 'package:workmanager/workmanager.dart';
+// import 'package:workmanager/workmanager.dart';
 
 //for work manager
 // @pragma('vm:entry-point')
