@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:todolists/screens/splash.dart';
 import 'package:todolists/services/db_service.dart';
 import 'package:todolists/services/theme_service.dart';
 import 'package:todolists/themes/theme.dart';
+import 'package:timezone/data/latest_all.dart' as tl;
+import 'package:timezone/timezone.dart' as tz;
 // import 'package:workmanager/workmanager.dart';
 
 //for work manager
@@ -18,8 +21,16 @@ import 'package:todolists/themes/theme.dart';
 //   });
 // }
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tl.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Asia/Rangoon'));
+
+  const AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings('@mipmap/tododo');
+  const InitializationSettings initializationSettings = InitializationSettings(android: androidInitializationSettings);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   // await GetStorage.init();
   // await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
   // await Workmanager().registerPeriodicTask(
